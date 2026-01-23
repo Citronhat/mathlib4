@@ -159,6 +159,34 @@ lemma IsStrictOrderedRing.of_mul_pos [Ring R] [PartialOrder R] [IsOrderedAddMono
   mul_lt_mul_of_pos_right a ha b c hbc := by
     simpa only [sub_mul, sub_pos] using mul_pos _ _ (sub_pos.2 hbc) ha
 
+
+/-
+
+The follow two are result I may do in a PR to Mathlib.
+
+-/
+
+lemma zero_le_one_of_mul_nonneg {R : Type*} [Ring R] [LinearOrder R] [IsOrderedAddMonoid R]
+   (mul_nonneg : ∀ a b : R, 0 ≤ a → 0 ≤ b → 0 ≤ a * b) : ZeroLEOneClass R where
+  zero_le_one := by
+    rcases le_total (0 : R) 1 with h | h
+    · exact h
+    · rw [← mul_one 1, ← neg_mul_neg]
+      exact mul_nonneg _ _  (neg_nonneg.mpr h) (neg_nonneg.mpr h)
+
+lemma zero_le_one_of_mul_pos {R : Type*} [Ring R] [LinearOrder R] [IsOrderedAddMonoid R]
+     (mul_pos : ∀ a b : R, 0 < a → 0 < b → 0 < a * b) : ZeroLEOneClass R where
+  zero_le_one := by
+    rcases lt_trichotomy (0 : R) 1 with h | h | h
+    · exact h.le
+    · exact le_of_eq h
+    · rw [← mul_one 1, ← neg_mul_neg]
+      exact le_of_lt <| mul_pos _ _ (neg_pos.mpr h) (neg_pos.mpr h)
+
+
+
+
+
 -- see Note [lower instance priority]
 /-- Turn an ordered domain into a strict ordered ring. -/
 instance (priority := 50) IsOrderedRing.toIsStrictOrderedRing (R : Type*)
