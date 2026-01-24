@@ -159,10 +159,20 @@ lemma IsStrictOrderedRing.of_mul_pos [Ring R] [PartialOrder R] [IsOrderedAddMono
   mul_lt_mul_of_pos_right a ha b c hbc := by
     simpa only [sub_mul, sub_pos] using mul_pos _ _ (sub_pos.2 hbc) ha
 
-
 /-
 
 The follow two are result I may do in a PR to Mathlib.
+
+Their main intended usage to be construct `IsOrderedRing R` and `IsStrictOrderedRing R` through
+the lemmas `IsOrderedRing.of_mul_nonneg` and `IsStrictOrderedRing.of_mul_pos` when the is a
+`LinearOrder`. The point is that the assumption `ZeroLEOneClass` is fulfilled automatically.
+
+Help me decide if the lemmas bellow should exist on their own or it would be better
+if we bake them to analog versions of `IsOrderedRing.of_mul_nonneg` and
+`IsStrictOrderedRing.of_mul_pos` where `PartialOrder R` is replaced with `LinearOrder R` and
+the `ZeroLEOneClass` assumption is removed. I am inclinced to bake them in, but I open for
+alternatives.
+
 
 -/
 
@@ -182,9 +192,6 @@ lemma zero_le_one_of_mul_pos {R : Type*} [Ring R] [LinearOrder R] [IsOrderedAddM
     · exact le_of_eq h
     · rw [← mul_one 1, ← neg_mul_neg]
       exact le_of_lt <| mul_pos _ _ (neg_pos.mpr h) (neg_pos.mpr h)
-
-
-
 
 
 -- see Note [lower instance priority]
