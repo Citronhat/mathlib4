@@ -159,40 +159,25 @@ lemma IsStrictOrderedRing.of_mul_pos [Ring R] [PartialOrder R] [IsOrderedAddMono
   mul_lt_mul_of_pos_right a ha b c hbc := by
     simpa only [sub_mul, sub_pos] using mul_pos _ _ (sub_pos.2 hbc) ha
 
-/-
+lemma IsOrderedRing.of_mul_nonneg_linearOrder [Ring R] [LinearOrder R] [IsOrderedAddMonoid R]
+    (mul_nonneg : ∀ a b : R, 0 ≤ a → 0 ≤ b → 0 ≤ a * b) : IsOrderedRing R :=
+  have : ZeroLEOneClass R := {
+    zero_le_one := by
+      rcases le_total (0 : R) 1 with h | h
+      · exact h
+      · rw [← mul_one 1, ← neg_mul_neg]
+        exact mul_nonneg _ _ (neg_nonneg.mpr h) (neg_nonneg.mpr h) }
+  IsOrderedRing.of_mul_nonneg mul_nonneg
 
-The follow two are result I may do in a PR to Mathlib.
-
-Their main intended usage to be construct `IsOrderedRing R` and `IsStrictOrderedRing R` through
-the lemmas `IsOrderedRing.of_mul_nonneg` and `IsStrictOrderedRing.of_mul_pos` when the is a
-`LinearOrder`. The point is that the assumption `ZeroLEOneClass` is fulfilled automatically.
-
-Help me decide if the lemmas bellow should exist on their own or it would be better
-if we bake them to analog versions of `IsOrderedRing.of_mul_nonneg` and
-`IsStrictOrderedRing.of_mul_pos` where `PartialOrder R` is replaced with `LinearOrder R` and
-the `ZeroLEOneClass` assumption is removed. I am inclinced to bake them in, but I open for
-alternatives.
-
-
--/
-
-lemma zero_le_one_of_mul_nonneg {R : Type*} [Ring R] [LinearOrder R] [IsOrderedAddMonoid R]
-   (mul_nonneg : ∀ a b : R, 0 ≤ a → 0 ≤ b → 0 ≤ a * b) : ZeroLEOneClass R where
-  zero_le_one := by
-    rcases le_total (0 : R) 1 with h | h
-    · exact h
-    · rw [← mul_one 1, ← neg_mul_neg]
-      exact mul_nonneg _ _  (neg_nonneg.mpr h) (neg_nonneg.mpr h)
-
-lemma zero_le_one_of_mul_pos {R : Type*} [Ring R] [LinearOrder R] [IsOrderedAddMonoid R]
-     (mul_pos : ∀ a b : R, 0 < a → 0 < b → 0 < a * b) : ZeroLEOneClass R where
-  zero_le_one := by
-    rcases lt_trichotomy (0 : R) 1 with h | h | h
-    · exact h.le
-    · exact le_of_eq h
-    · rw [← mul_one 1, ← neg_mul_neg]
-      exact le_of_lt <| mul_pos _ _ (neg_pos.mpr h) (neg_pos.mpr h)
-
+lemma IsStrictOrderedRing.of_mul_pos_linearOrder [Ring R] [LinearOrder R] [IsOrderedAddMonoid R]
+    [Nontrivial R] (mul_pos : ∀ a b : R, 0 < a → 0 < b → 0 < a * b) : IsStrictOrderedRing R :=
+  have : ZeroLEOneClass R := {
+    zero_le_one := by
+      rcases le_or_gt (0 : R) 1 with h | h
+      · exact h
+      · rw [← mul_one 1, ← neg_mul_neg]
+        exact le_of_lt <| mul_pos _ _ (neg_pos.mpr h) (neg_pos.mpr h) }
+  IsStrictOrderedRing.of_mul_pos mul_pos
 
 -- see Note [lower instance priority]
 /-- Turn an ordered domain into a strict ordered ring. -/
